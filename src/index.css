@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif-lux: "Cinzel", "Playfair Display", serif;
+  --font-sans-lux: "Inter", sans-serif;
+  
+  --color-gold-light: #F6E294;
+  --color-gold-primary: #D4AF37;
+  --color-gold-dark: #A68015;
+  --color-gold-accent: #C5A880;
+  --color-gold-hover: #E8D37E;
+  
+  --color-lux-bg: #0A0A0A;
+  --color-lux-card: #151515;
+  --color-lux-card-light: #1E1E1E;
+  --color-lux-border: #2B261A; /* Dark gold-tinted charcoal border */
+  --color-lux-gold-border: rgba(212, 175, 55, 0.2);
+}
+
+/* Custom styles for luxury glassmorphism and ambient glow */
+.gold-glow {
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+}
+
+.gold-border-glow {
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.08);
+}
+
+.gold-gradient-bg {
+  background: linear-gradient(135deg, #D4AF37 0%, #F6E294 50%, #A68015 100%);
+}
+
+.dark-gold-gradient-bg {
+  background: linear-gradient(135deg, #151515 0%, #1E1E1E 50%, #0A0A0A 100%);
+}
+
+/* Custom scrollbar for sleek minimalist layout */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A0A0A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2A2A2A;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D4AF37;
+}
+

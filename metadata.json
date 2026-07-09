@@ -1,0 +1,6 @@
+{
+  "name": "Tarefas e Hábitos",
+  "description": "Um aplicativo elegante em preto, branco e dourado para gerenciar suas tarefas, hábitos, rotina diária, metas semanais e lembretes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
