@@ -274,15 +274,9 @@ export default function App() {
         {/* Upper Brand bar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-lux-border/60">
           <div>
-            <h1 className="font-serif-lux text-2xl md:text-3xl font-extrabold tracking-[0.25em] text-white flex items-center gap-1.5">
-              AUREUM
-              <span className="text-gold-primary font-normal text-xs tracking-widest align-super ml-1 border border-gold-primary/30 rounded px-1.5 py-0.5 font-sans-lux bg-gold-primary/5">
-                V1.0
-              </span>
+            <h1 className="font-serif-lux text-2xl md:text-3xl font-extrabold tracking-[0.25em] text-white flex items-center gap-1.5 uppercase">
+              TAREFAS E HÁBITOS
             </h1>
-            <p className="text-[10px] md:text-xs font-serif-lux tracking-[0.15em] text-gold-accent mt-1 uppercase">
-              Planejamento de Elite • Disciplina Inabalável • Evolução
-            </p>
           </div>
 
           {/* Luxury Clock / Calendar Widget */}
