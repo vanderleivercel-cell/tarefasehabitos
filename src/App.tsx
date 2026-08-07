@@ -40,27 +40,27 @@ import {
 export default function App() {
   // --- STATE INITIALIZATION & DURABLE PERSISTENCE ---
   const [categories, setCategories] = useState<Category[]>(() => {
-    const saved = localStorage.getItem('lux_categories');
+    const saved = localStorage.getItem('lux_v2_categories');
     return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
   });
 
   const [tasks, setTasks] = useState<Task[]>(() => {
-    const saved = localStorage.getItem('lux_tasks');
+    const saved = localStorage.getItem('lux_v2_tasks');
     return saved ? JSON.parse(saved) : DEFAULT_TASKS;
   });
 
   const [habits, setHabits] = useState<Habit[]>(() => {
-    const saved = localStorage.getItem('lux_habits');
+    const saved = localStorage.getItem('lux_v2_habits');
     return saved ? JSON.parse(saved) : DEFAULT_HABITS;
   });
 
   const [goals, setGoals] = useState<WeeklyGoal[]>(() => {
-    const saved = localStorage.getItem('lux_goals');
+    const saved = localStorage.getItem('lux_v2_goals');
     return saved ? JSON.parse(saved) : DEFAULT_WEEKLY_GOALS;
   });
 
   const [reminders, setReminders] = useState<Reminder[]>(() => {
-    const saved = localStorage.getItem('lux_reminders');
+    const saved = localStorage.getItem('lux_v2_reminders');
     return saved ? JSON.parse(saved) : DEFAULT_REMINDERS;
   });
 
@@ -73,23 +73,23 @@ export default function App() {
 
   // --- PERSISTENCE SYNCHRONIZATION ---
   useEffect(() => {
-    localStorage.setItem('lux_categories', JSON.stringify(categories));
+    localStorage.setItem('lux_v2_categories', JSON.stringify(categories));
   }, [categories]);
 
   useEffect(() => {
-    localStorage.setItem('lux_tasks', JSON.stringify(tasks));
+    localStorage.setItem('lux_v2_tasks', JSON.stringify(tasks));
   }, [tasks]);
 
   useEffect(() => {
-    localStorage.setItem('lux_habits', JSON.stringify(habits));
+    localStorage.setItem('lux_v2_habits', JSON.stringify(habits));
   }, [habits]);
 
   useEffect(() => {
-    localStorage.setItem('lux_goals', JSON.stringify(goals));
+    localStorage.setItem('lux_v2_goals', JSON.stringify(goals));
   }, [goals]);
 
   useEffect(() => {
-    localStorage.setItem('lux_reminders', JSON.stringify(reminders));
+    localStorage.setItem('lux_v2_reminders', JSON.stringify(reminders));
   }, [reminders]);
 
   // Live clock interval
