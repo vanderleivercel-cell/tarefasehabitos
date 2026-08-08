@@ -96,7 +96,11 @@ export default function App() {
   useEffect(() => {
     // Only check when seconds hit 00 to avoid multiple triggers in the same minute
     if (currentTime.getSeconds() === 0) {
-      const dateStr = currentTime.toISOString().split('T')[0];
+      const year = currentTime.getFullYear();
+      const month = (currentTime.getMonth() + 1).toString().padStart(2, '0');
+      const day = currentTime.getDate().toString().padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+      
       const h = currentTime.getHours().toString().padStart(2, '0');
       const m = currentTime.getMinutes().toString().padStart(2, '0');
       const timeStr = `${h}:${m}`;
