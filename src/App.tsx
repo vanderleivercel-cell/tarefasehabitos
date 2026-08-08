@@ -268,9 +268,11 @@ export default function App() {
         {/* Upper Brand bar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-lux-border/60">
           <div>
-            <h1 className="font-serif-lux text-2xl md:text-3xl font-extrabold tracking-[0.25em] text-white flex items-center gap-1.5 uppercase">
-              TAREFAS E HÁBITOS
-            </h1>
+            <img 
+              src="/logo-site.png" 
+              alt="Logo Tarefas e Hábitos" 
+              className="h-8 md:h-10 w-auto object-contain"
+            />
           </div>
 
           {/* Luxury Clock / Calendar Widget */}
