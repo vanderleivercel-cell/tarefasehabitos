@@ -6,13 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Category, Task, Habit, WeeklyGoal, Reminder } from './types';
-import {
-  DEFAULT_CATEGORIES,
-  DEFAULT_TASKS,
-  DEFAULT_HABITS,
-  DEFAULT_WEEKLY_GOALS,
-  DEFAULT_REMINDERS,
-} from './utils/initialData';
+import { supabase } from './lib/supabase';
 
 // Component Imports
 import CategoriesManager from './components/CategoriesManager';
@@ -27,42 +21,20 @@ import {
   CheckSquare,
   Sparkles,
   Target,
-  Clock,
   Calendar,
-  Compass,
   Trophy,
   Flame,
-  Award,
   Bell,
   RefreshCw,
 } from 'lucide-react';
 
 export default function App() {
-  // --- STATE INITIALIZATION & DURABLE PERSISTENCE ---
-  const [categories, setCategories] = useState<Category[]>(() => {
-    const saved = localStorage.getItem('lux_v2_categories');
-    return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
-  });
-
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    const saved = localStorage.getItem('lux_v2_tasks');
-    return saved ? JSON.parse(saved) : DEFAULT_TASKS;
-  });
-
-  const [habits, setHabits] = useState<Habit[]>(() => {
-    const saved = localStorage.getItem('lux_v2_habits');
-    return saved ? JSON.parse(saved) : DEFAULT_HABITS;
-  });
-
-  const [goals, setGoals] = useState<WeeklyGoal[]>(() => {
-    const saved = localStorage.getItem('lux_v2_goals');
-    return saved ? JSON.parse(saved) : DEFAULT_WEEKLY_GOALS;
-  });
-
-  const [reminders, setReminders] = useState<Reminder[]>(() => {
-    const saved = localStorage.getItem('lux_v2_reminders');
-    return saved ? JSON.parse(saved) : DEFAULT_REMINDERS;
-  });
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [goals, setGoals] = useState<WeeklyGoal[]>([]);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Navigation & Filtering
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -71,196 +43,182 @@ export default function App() {
   // Live luxury clock
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // --- PERSISTENCE SYNCHRONIZATION ---
-  useEffect(() => {
-    localStorage.setItem('lux_v2_categories', JSON.stringify(categories));
-  }, [categories]);
+  // Fetch Data from Supabase
+  const fetchData = async () => {
+    setLoading(true);
+    const [catsRes, tasksRes, habitsRes, goalsRes, remsRes] = await Promise.all([
+      supabase.from('categories').select('*').order('name'),
+      supabase.from('tasks').select('*').order('created_at', { ascending: false }),
+      supabase.from('habits').select('*').order('created_at', { ascending: false }),
+      supabase.from('weekly_goals').select('*').order('created_at', { ascending: false }),
+      supabase.from('reminders').select('*').order('created_at', { ascending: false })
+    ]);
+
+    if (catsRes.data) setCategories(catsRes.data);
+    if (tasksRes.data) setTasks(tasksRes.data.map(t => ({ id: t.id, text: t.text, completed: t.completed, categoryId: t.category_id, priority: t.priority as any, dueDate: t.due_date, createdAt: t.created_at })));
+    if (habitsRes.data) setHabits(habitsRes.data.map(h => ({ id: h.id, name: h.name, categoryId: h.category_id, streak: h.streak, completedDates: h.completed_dates || [], frequency: h.frequency as any, createdAt: h.created_at })));
+    if (goalsRes.data) setGoals(goalsRes.data.map(g => ({ id: g.id, title: g.title, currentValue: g.current_value, targetValue: g.target_value, unit: g.unit, completed: g.completed, createdAt: g.created_at })));
+    if (remsRes.data) setReminders(remsRes.data.map(r => ({ id: r.id, text: r.text, time: r.time, date: r.date, active: r.active, createdAt: r.created_at })));
+    
+    setLoading(false);
+  };
 
   useEffect(() => {
-    localStorage.setItem('lux_v2_tasks', JSON.stringify(tasks));
-  }, [tasks]);
+    fetchData();
+
+    // Set up Realtime subscriptions
+    const subCategories = supabase.channel('categories_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, fetchData).subscribe();
+    const subTasks = supabase.channel('tasks_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, fetchData).subscribe();
+    const subHabits = supabase.channel('habits_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'habits' }, fetchData).subscribe();
+    const subGoals = supabase.channel('goals_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'weekly_goals' }, fetchData).subscribe();
+    const subReminders = supabase.channel('reminders_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'reminders' }, fetchData).subscribe();
+
+    return () => {
+      supabase.removeChannel(subCategories);
+      supabase.removeChannel(subTasks);
+      supabase.removeChannel(subHabits);
+      supabase.removeChannel(subGoals);
+      supabase.removeChannel(subReminders);
+    };
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem('lux_v2_habits', JSON.stringify(habits));
-  }, [habits]);
-
-  useEffect(() => {
-    localStorage.setItem('lux_v2_goals', JSON.stringify(goals));
-  }, [goals]);
-
-  useEffect(() => {
-    localStorage.setItem('lux_v2_reminders', JSON.stringify(reminders));
-  }, [reminders]);
-
-  // Live clock interval
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
   // --- STATE MANIPULATORS ---
 
   // Categories
-  const handleAddCategory = (newCat: Category) => {
-    setCategories((prev) => [...prev, newCat]);
+  const handleAddCategory = async (newCat: Category) => {
+    // Generate UUID implicitly by Supabase or pass it
+    const { data } = await supabase.from('categories').insert([{ name: newCat.name, color: newCat.color, icon: newCat.icon }]).select().single();
+    if (data) setCategories(prev => [...prev, data]);
   };
 
-  const handleDeleteCategory = (catId: string) => {
-    // Prevent deleting default categories
-    if (['cat-1', 'cat-2', 'cat-3', 'cat-4', 'cat-5'].includes(catId)) return;
-    setCategories((prev) => prev.filter((c) => c.id !== catId));
-    // Reset selection if deleted
-    if (selectedCategoryId === catId) {
-      setSelectedCategoryId(null);
-    }
-    // Remap tasks and habits under deleted category to "Rotina & Essencial"
-    setTasks((prev) =>
-      prev.map((t) => (t.categoryId === catId ? { ...t, categoryId: 'cat-5' } : t))
-    );
-    setHabits((prev) =>
-      prev.map((h) => (h.categoryId === catId ? { ...h, categoryId: 'cat-5' } : h))
-    );
+  const handleDeleteCategory = async (catId: string) => {
+    await supabase.from('categories').delete().eq('id', catId);
+    setCategories(prev => prev.filter(c => c.id !== catId));
+    if (selectedCategoryId === catId) setSelectedCategoryId(null);
   };
 
   // Checklist Tasks
-  const handleAddTask = (newTask: Task) => {
-    setTasks((prev) => [newTask, ...prev]);
+  const handleAddTask = async (newTask: Task) => {
+    const { data } = await supabase.from('tasks').insert([{ text: newTask.text, completed: newTask.completed, category_id: newTask.categoryId, priority: newTask.priority, due_date: newTask.dueDate }]).select().single();
+    if (data) setTasks(prev => [{ id: data.id, text: data.text, completed: data.completed, categoryId: data.category_id, priority: data.priority as any, dueDate: data.due_date, createdAt: data.created_at }, ...prev]);
   };
 
-  const handleToggleTask = (taskId: string) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === taskId ? { ...t, completed: !t.completed } : t))
-    );
+  const handleToggleTask = async (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    const newStatus = !task.completed;
+    setTasks(prev => prev.map(t => (t.id === taskId ? { ...t, completed: newStatus } : t)));
+    await supabase.from('tasks').update({ completed: newStatus }).eq('id', taskId);
   };
 
-  const handleDeleteTask = (taskId: string) => {
-    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+  const handleDeleteTask = async (taskId: string) => {
+    setTasks(prev => prev.filter(t => t.id !== taskId));
+    await supabase.from('tasks').delete().eq('id', taskId);
   };
 
   // Daily Habits
-  const handleAddHabit = (newHabit: Habit) => {
-    setHabits((prev) => [newHabit, ...prev]);
+  const handleAddHabit = async (newHabit: Habit) => {
+    const { data } = await supabase.from('habits').insert([{ name: newHabit.name, category_id: newHabit.categoryId, frequency: newHabit.frequency }]).select().single();
+    if (data) setHabits(prev => [{ id: data.id, name: data.name, categoryId: data.category_id, streak: data.streak, completedDates: data.completed_dates || [], frequency: data.frequency as any, createdAt: data.created_at }, ...prev]);
   };
 
-  const handleToggleHabitDate = (habitId: string, dateStr: string) => {
-    setHabits((prev) =>
-      prev.map((h) => {
-        if (h.id !== habitId) return h;
-        const exists = h.completedDates.includes(dateStr);
-        const newCompletedDates = exists
-          ? h.completedDates.filter((d) => d !== dateStr)
-          : [...h.completedDates, dateStr];
-
-        return {
-          ...h,
-          completedDates: newCompletedDates,
-        };
-      })
-    );
+  const handleToggleHabitDate = async (habitId: string, dateStr: string) => {
+    const habit = habits.find(h => h.id === habitId);
+    if (!habit) return;
+    const exists = habit.completedDates.includes(dateStr);
+    const newCompletedDates = exists ? habit.completedDates.filter(d => d !== dateStr) : [...habit.completedDates, dateStr];
+    setHabits(prev => prev.map(h => h.id === habitId ? { ...h, completedDates: newCompletedDates } : h));
+    await supabase.from('habits').update({ completed_dates: newCompletedDates }).eq('id', habitId);
   };
 
-  const handleDeleteHabit = (habitId: string) => {
-    setHabits((prev) => prev.filter((h) => h.id !== habitId));
+  const handleDeleteHabit = async (habitId: string) => {
+    setHabits(prev => prev.filter(h => h.id !== habitId));
+    await supabase.from('habits').delete().eq('id', habitId);
   };
 
   // Weekly Goals
-  const handleAddGoal = (newGoal: WeeklyGoal) => {
-    setGoals((prev) => [newGoal, ...prev]);
+  const handleAddGoal = async (newGoal: WeeklyGoal) => {
+    const { data } = await supabase.from('weekly_goals').insert([{ title: newGoal.title, target_value: newGoal.targetValue, unit: newGoal.unit }]).select().single();
+    if (data) setGoals(prev => [{ id: data.id, title: data.title, currentValue: data.current_value, targetValue: data.target_value, unit: data.unit, completed: data.completed, createdAt: data.created_at }, ...prev]);
   };
 
-  const handleUpdateGoalProgress = (goalId: string, newValue: number) => {
-    setGoals((prev) =>
-      prev.map((g) => {
-        if (g.id !== goalId) return g;
-        const isCompleted = newValue >= g.targetValue;
-        return {
-          ...g,
-          currentValue: newValue,
-          completed: isCompleted,
-        };
-      })
-    );
+  const handleUpdateGoalProgress = async (goalId: string, newValue: number) => {
+    const goal = goals.find(g => g.id === goalId);
+    if (!goal) return;
+    const isCompleted = newValue >= goal.targetValue;
+    setGoals(prev => prev.map(g => g.id === goalId ? { ...g, currentValue: newValue, completed: isCompleted } : g));
+    await supabase.from('weekly_goals').update({ current_value: newValue, completed: isCompleted }).eq('id', goalId);
   };
 
-  const handleDeleteGoal = (goalId: string) => {
-    setGoals((prev) => prev.filter((g) => g.id !== goalId));
+  const handleDeleteGoal = async (goalId: string) => {
+    setGoals(prev => prev.filter(g => g.id !== goalId));
+    await supabase.from('weekly_goals').delete().eq('id', goalId);
   };
 
   // Reminders
-  const handleAddReminder = (newReminder: Reminder) => {
-    setReminders((prev) => [newReminder, ...prev]);
+  const handleAddReminder = async (newReminder: Reminder) => {
+    const { data } = await supabase.from('reminders').insert([{ text: newReminder.text, time: newReminder.time, date: newReminder.date, active: newReminder.active }]).select().single();
+    if (data) setReminders(prev => [{ id: data.id, text: data.text, time: data.time, date: data.date, active: data.active, createdAt: data.created_at }, ...prev]);
   };
 
-  const handleToggleReminder = (remId: string) => {
-    setReminders((prev) =>
-      prev.map((r) => (r.id === remId ? { ...r, active: !r.active } : r))
-    );
+  const handleToggleReminder = async (remId: string) => {
+    const rem = reminders.find(r => r.id === remId);
+    if (!rem) return;
+    const newStatus = !rem.active;
+    setReminders(prev => prev.map(r => (r.id === remId ? { ...r, active: newStatus } : r)));
+    await supabase.from('reminders').update({ active: newStatus }).eq('id', remId);
   };
 
-  const handleDeleteReminder = (remId: string) => {
-    setReminders((prev) => prev.filter((r) => r.id !== remId));
+  const handleDeleteReminder = async (remId: string) => {
+    setReminders(prev => prev.filter(r => r.id !== remId));
+    await supabase.from('reminders').delete().eq('id', remId);
   };
 
-  // Reset all to default (Prudential restart)
-  const handleResetAll = () => {
-    if (window.confirm('Deseja redefinir todos os dados para o padrão de fábrica?')) {
-      setCategories(DEFAULT_CATEGORIES);
-      setTasks(DEFAULT_TASKS);
-      setHabits(DEFAULT_HABITS);
-      setGoals(DEFAULT_WEEKLY_GOALS);
-      setReminders(DEFAULT_REMINDERS);
-      setSelectedCategoryId(null);
-      setActiveTab('all');
+  const handleResetAll = async () => {
+    if (window.confirm('Deseja EXCLUIR TODOS OS DADOS da nuvem permanentemente?')) {
+      await supabase.from('tasks').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('habits').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('weekly_goals').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('reminders').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('categories').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      fetchData();
     }
   };
 
   // --- STATS COMPUTATION ---
   const todayStr = new Date().toISOString().split('T')[0];
 
-  // Category counts
   const getItemCountsPerCategory = () => {
     const counts: Record<string, number> = {};
-    categories.forEach((c) => {
-      counts[c.id] = 0;
-    });
-
-    tasks.forEach((t) => {
-      if (!t.completed && counts[t.categoryId] !== undefined) {
-        counts[t.categoryId]++;
-      }
-    });
-
-    habits.forEach((h) => {
+    categories.forEach(c => { counts[c.id] = 0; });
+    tasks.forEach(t => { if (!t.completed && counts[t.categoryId] !== undefined) counts[t.categoryId]++; });
+    habits.forEach(h => {
       const doneToday = h.completedDates.includes(todayStr);
-      if (!doneToday && counts[h.categoryId] !== undefined) {
-        counts[h.categoryId]++;
-      }
+      if (!doneToday && counts[h.categoryId] !== undefined) counts[h.categoryId]++;
     });
-
     return counts;
   };
 
   const itemCounts = getItemCountsPerCategory();
 
-  // Tasks progress stats
-  const completedTasksCount = tasks.filter((t) => t.completed).length;
+  const completedTasksCount = tasks.filter(t => t.completed).length;
   const totalTasksCount = tasks.length;
   const tasksPercent = totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0;
 
-  // Habits completed today count
-  const completedHabitsToday = habits.filter((h) => h.completedDates.includes(todayStr)).length;
+  const completedHabitsToday = habits.filter(h => h.completedDates.includes(todayStr)).length;
   const totalHabitsCount = habits.length;
   const habitsPercent = totalHabitsCount > 0 ? Math.round((completedHabitsToday / totalHabitsCount) * 100) : 0;
 
-  // Weekly Goals completed
-  const completedGoalsCount = goals.filter((g) => g.completed).length;
+  const completedGoalsCount = goals.filter(g => g.completed).length;
   const totalGoalsCount = goals.length;
   const goalsPercent = totalGoalsCount > 0 ? Math.round((completedGoalsCount / totalGoalsCount) * 100) : 0;
 
-  // Active reminders
-  const activeRemindersCount = reminders.filter((r) => r.active).length;
+  const activeRemindersCount = reminders.filter(r => r.active).length;
 
   return (
     <div className="min-h-screen bg-lux-bg text-gray-200 selection:bg-gold-primary selection:text-black pb-12">
