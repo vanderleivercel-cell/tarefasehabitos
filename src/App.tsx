@@ -66,6 +66,11 @@ export default function App() {
   useEffect(() => {
     fetchData();
 
+    // Request Notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
     // Set up Realtime subscriptions
     const subCategories = supabase.channel('categories_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, fetchData).subscribe();
     const subTasks = supabase.channel('tasks_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, fetchData).subscribe();
@@ -86,6 +91,35 @@ export default function App() {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Check for due reminders
+  useEffect(() => {
+    // Only check when seconds hit 00 to avoid multiple triggers in the same minute
+    if (currentTime.getSeconds() === 0) {
+      const dateStr = currentTime.toISOString().split('T')[0];
+      const timeStr = currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      
+      const dueReminders = reminders.filter(
+        (r) => r.active && r.date === dateStr && r.time === timeStr
+      );
+
+      if (dueReminders.length > 0) {
+        // Play luxury chime sound
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        audio.play().catch(err => console.log('Áudio bloqueado pelo navegador:', err));
+
+        // Show native notifications
+        dueReminders.forEach(r => {
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Lembrete de Elite', { body: r.text, icon: '/vite.svg' });
+          } else {
+            // Fallback if notifications are not enabled
+            alert(`🔔 Lembrete: ${r.text}`);
+          }
+        });
+      }
+    }
+  }, [currentTime, reminders]);
 
   // --- STATE MANIPULATORS ---
 
