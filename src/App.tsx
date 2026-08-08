@@ -97,7 +97,9 @@ export default function App() {
     // Only check when seconds hit 00 to avoid multiple triggers in the same minute
     if (currentTime.getSeconds() === 0) {
       const dateStr = currentTime.toISOString().split('T')[0];
-      const timeStr = currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const h = currentTime.getHours().toString().padStart(2, '0');
+      const m = currentTime.getMinutes().toString().padStart(2, '0');
+      const timeStr = `${h}:${m}`;
       
       const dueReminders = reminders.filter(
         (r) => r.active && r.date === dateStr && r.time === timeStr
@@ -105,7 +107,7 @@ export default function App() {
 
       if (dueReminders.length > 0) {
         // Play luxury chime sound
-        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        const audio = new Audio('/notification.mp3');
         audio.play().catch(err => console.log('Áudio bloqueado pelo navegador:', err));
 
         // Show native notifications
