@@ -9,6 +9,7 @@ import { Category, Task, Habit, WeeklyGoal, Reminder } from './types';
 import { supabase } from './lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { Auth } from './components/Auth';
+import AdminPanel from './components/AdminPanel';
 
 // Component Imports
 import CategoriesManager from './components/CategoriesManager';
@@ -28,9 +29,11 @@ import {
   Flame,
   Bell,
   RefreshCw,
+  Clock,
+  Loader2,
 } from 'lucide-react';
 
-function MainApp({ session }: { session: Session }) {
+function MainApp({ session, profile }: { session: Session; profile: any }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -44,6 +47,21 @@ function MainApp({ session }: { session: Session }) {
 
   // Live luxury clock
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Hidden Admin Panel state
+  const [adminClicks, setAdminClicks] = useState(0);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+
+  const handleFooterClick = () => {
+    if (profile?.role !== 'admin') return;
+    setAdminClicks(prev => {
+      if (prev + 1 >= 5) {
+        setShowAdminPanel(true);
+        return 0;
+      }
+      return prev + 1;
+    });
+  };
 
   // Fetch Data from Supabase
   const fetchData = async () => {
@@ -593,30 +611,78 @@ function MainApp({ session }: { session: Session }) {
           </div>
         </div>
       </main>
+      {/* Footer with hidden admin trigger */}
+      <footer 
+        onClick={handleFooterClick} 
+        className="pb-8 text-center text-[10px] text-gray-700 font-mono select-none cursor-default"
+      >
+        &copy; {new Date().getFullYear()} TAREFAS E HÁBITOS. TODOS OS DIREITOS RESERVADOS.
+      </footer>
+
+      {showAdminPanel && <AdminPanel onClose={() => setShowAdminPanel(false)} />}
     </div>
   );
 }
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      if (session) fetchProfile(session.user.id);
+      else setLoadingProfile(false);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (session) fetchProfile(session.user.id);
+      else setLoadingProfile(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
+  const fetchProfile = async (userId: string) => {
+    setLoadingProfile(true);
+    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    if (data) setProfile(data);
+    setLoadingProfile(false);
+  };
+
   if (!session) {
     return <Auth />;
   }
 
-  return <MainApp session={session} />;
+  if (loadingProfile) {
+    return (
+      <div className="min-h-screen bg-lux-bg flex items-center justify-center">
+        <Loader2 className="animate-spin text-gold-primary" size={40} />
+      </div>
+    );
+  }
+
+  // Subscription Gate
+  if (profile?.status !== 'active') {
+    return (
+      <div className="min-h-screen bg-lux-bg flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-md bg-lux-card/80 border border-yellow-500/30 rounded-2xl p-8 text-center shadow-[0_8px_32px_rgba(0,0,0,0.8)] backdrop-blur-md">
+          <Clock className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+          <h2 className="font-serif-lux text-xl font-bold text-white uppercase tracking-widest mb-4">Assinatura Pendente</h2>
+          <p className="text-gray-400 font-mono text-sm mb-8">
+            Seu acesso está em análise ou aguardando confirmação de pagamento. Por favor, aguarde a liberação pelo administrador.
+          </p>
+          <button onClick={() => supabase.auth.signOut()} className="text-gold-primary border border-gold-primary/50 hover:bg-gold-primary/10 px-6 py-2 rounded uppercase font-bold tracking-widest text-xs transition-colors">
+            Sair
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return <MainApp session={session} profile={profile} />;
 }
