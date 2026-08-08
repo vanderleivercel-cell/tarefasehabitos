@@ -40,7 +40,11 @@ export default function HabitsManager({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !categoryId) return;
+    if (!name.trim()) return;
+    if (!categoryId) {
+      alert('⚠️ Por favor, crie pelo menos uma Categoria primeiro para poder adicionar hábitos!');
+      return;
+    }
 
     const newHabit: Habit = {
       id: `habit-${Date.now()}`,

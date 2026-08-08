@@ -48,7 +48,11 @@ export default function ChecklistManager({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!text.trim() || !categoryId) return;
+    if (!text.trim()) return;
+    if (!categoryId) {
+      alert('⚠️ Por favor, crie pelo menos uma Categoria primeiro para poder adicionar tarefas!');
+      return;
+    }
 
     const newTask: Task = {
       id: `task-${Date.now()}`,
