@@ -92,18 +92,23 @@ export default function App() {
     return () => clearInterval(timer);
   }, []);
 
+  // Reference to track the last checked minute
+  const lastCheckedMinute = React.useRef<string | null>(null);
+
   // Check for due reminders
   useEffect(() => {
-    // Only check when seconds hit 00 to avoid multiple triggers in the same minute
-    if (currentTime.getSeconds() === 0) {
-      const year = currentTime.getFullYear();
-      const month = (currentTime.getMonth() + 1).toString().padStart(2, '0');
-      const day = currentTime.getDate().toString().padStart(2, '0');
-      const dateStr = `${year}-${month}-${day}`;
-      
-      const h = currentTime.getHours().toString().padStart(2, '0');
-      const m = currentTime.getMinutes().toString().padStart(2, '0');
-      const timeStr = `${h}:${m}`;
+    const year = currentTime.getFullYear();
+    const month = (currentTime.getMonth() + 1).toString().padStart(2, '0');
+    const day = currentTime.getDate().toString().padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+    
+    const h = currentTime.getHours().toString().padStart(2, '0');
+    const m = currentTime.getMinutes().toString().padStart(2, '0');
+    const timeStr = `${h}:${m}`;
+    
+    // Only check once per minute, robust against browser tab throttling
+    if (lastCheckedMinute.current !== timeStr) {
+      lastCheckedMinute.current = timeStr;
       
       const dueReminders = reminders.filter(
         (r) => r.active && r.date === dateStr && r.time === timeStr
