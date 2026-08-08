@@ -269,7 +269,7 @@ export default function App() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-lux-border/60">
           <div>
             <img 
-              src="/logo-site.png" 
+              src="/logo-removebg.png" 
               alt="Logo Tarefas e Hábitos" 
               className="h-16 md:h-24 w-auto object-contain rounded-xl"
             />
