@@ -271,7 +271,7 @@ export default function App() {
             <img 
               src="/logo-site.png" 
               alt="Logo Tarefas e Hábitos" 
-              className="h-8 md:h-10 w-auto object-contain"
+              className="h-16 md:h-24 w-auto object-contain rounded-xl"
             />
           </div>
 
