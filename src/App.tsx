@@ -263,7 +263,7 @@ export default function App() {
           {/* Card 1: Checklist */}
           <div className="bg-lux-card border border-lux-border rounded-xl p-4 flex items-center justify-between hover:border-gold-primary/25 transition-all duration-300">
             <div>
-              <span className="text-[9px] uppercase tracking-widest text-gray-500 font-serif-lux block">Checklist de Tarefas</span>
+              <span className="text-[11px] sm:text-xs uppercase tracking-widest text-gray-300 font-bold font-serif-lux block">Checklist de Tarefas</span>
               <span className="text-xl font-mono font-bold text-white mt-1 block">
                 {completedTasksCount} <span className="text-xs text-gray-500">/ {totalTasksCount}</span>
               </span>
@@ -278,7 +278,7 @@ export default function App() {
           {/* Card 2: Habits */}
           <div className="bg-lux-card border border-lux-border rounded-xl p-4 flex items-center justify-between hover:border-gold-primary/25 transition-all duration-300">
             <div>
-              <span className="text-[9px] uppercase tracking-widest text-gray-500 font-serif-lux block">Hábitos de Hoje</span>
+              <span className="text-[11px] sm:text-xs uppercase tracking-widest text-gray-300 font-bold font-serif-lux block">Hábitos de Hoje</span>
               <span className="text-xl font-mono font-bold text-white mt-1 block">
                 {completedHabitsToday} <span className="text-xs text-gray-500">/ {totalHabitsCount}</span>
               </span>
@@ -293,7 +293,7 @@ export default function App() {
           {/* Card 3: Weekly Goals */}
           <div className="bg-lux-card border border-lux-border rounded-xl p-4 flex items-center justify-between hover:border-gold-primary/25 transition-all duration-300">
             <div>
-              <span className="text-[9px] uppercase tracking-widest text-gray-500 font-serif-lux block">Metas Semanais</span>
+              <span className="text-[11px] sm:text-xs uppercase tracking-widest text-gray-300 font-bold font-serif-lux block">Metas Semanais</span>
               <span className="text-xl font-mono font-bold text-white mt-1 block">
                 {completedGoalsCount} <span className="text-xs text-gray-500">/ {totalGoalsCount}</span>
               </span>
@@ -308,7 +308,7 @@ export default function App() {
           {/* Card 4: Focus Alerts */}
           <div className="bg-lux-card border border-lux-border rounded-xl p-4 flex items-center justify-between hover:border-gold-primary/25 transition-all duration-300">
             <div>
-              <span className="text-[9px] uppercase tracking-widest text-gray-500 font-serif-lux block">Sinais Ativos</span>
+              <span className="text-[11px] sm:text-xs uppercase tracking-widest text-gray-300 font-bold font-serif-lux block">Sinais Ativos</span>
               <span className="text-xl font-mono font-bold text-white mt-1 block">
                 {activeRemindersCount} <span className="text-xs text-gray-500">/ {reminders.length}</span>
               </span>
