@@ -7,6 +7,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Category, Task, Habit, WeeklyGoal, Reminder } from './types';
 import { supabase } from './lib/supabase';
+import { Session } from '@supabase/supabase-js';
+import { Auth } from './components/Auth';
 
 // Component Imports
 import CategoriesManager from './components/CategoriesManager';
@@ -28,7 +30,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
-export default function App() {
+function MainApp({ session }: { session: Session }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -284,24 +286,30 @@ export default function App() {
             />
           </div>
 
-          {/* Luxury Clock / Calendar Widget */}
-          <div className="flex items-center gap-4 bg-lux-card/40 border border-lux-border rounded-xl px-5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-            <div className="text-right">
-              <span className="text-[10px] text-gray-500 block font-serif-lux uppercase tracking-widest">Tempo Presente</span>
-              <span className="text-sm font-mono font-bold text-gold-primary gold-glow">
-                {currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-              </span>
-            </div>
-            <div className="h-8 w-px bg-lux-border" />
-            <div className="flex items-center gap-2">
-              <Calendar size={16} className="text-gold-primary" />
-              <div>
-                <span className="text-[9px] text-gray-500 block font-serif-lux uppercase tracking-widest">Data Imperial</span>
-                <span className="text-xs font-sans-lux font-semibold text-white capitalize">
-                  {currentTime.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' })}
+          {/* Luxury Clock & Logout Widget */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-center gap-4 bg-lux-card/40 border border-lux-border rounded-xl px-5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+              <div className="text-right">
+                <span className="text-[10px] text-gray-500 block font-serif-lux uppercase tracking-widest">Tempo Presente</span>
+                <span className="text-sm font-mono font-bold text-gold-primary gold-glow">
+                  {currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                </span>
+              </div>
+              <div className="w-[1px] h-8 bg-lux-border/50" />
+              <div className="text-left">
+                <span className="text-[10px] text-gray-500 block font-serif-lux uppercase tracking-widest">Data</span>
+                <span className="text-sm font-mono font-bold text-white">
+                  {currentTime.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '').toUpperCase()}
                 </span>
               </div>
             </div>
+
+            <button 
+              onClick={() => supabase.auth.signOut()}
+              className="text-xs font-mono text-gray-400 hover:text-gold-primary uppercase tracking-widest border border-lux-border hover:border-gold-primary rounded-lg px-4 py-3 transition-colors bg-black/40"
+            >
+              Sair
+            </button>
           </div>
         </div>
 
@@ -587,4 +595,28 @@ export default function App() {
       </main>
     </div>
   );
+}
+
+export default function App() {
+  const [session, setSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (!session) {
+    return <Auth />;
+  }
+
+  return <MainApp session={session} />;
 }
