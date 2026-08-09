@@ -300,7 +300,7 @@ function MainApp({ session, profile }: { session: Session; profile: any }) {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-lux-border/60">
           <div>
             <img 
-              src="/logomarca-nova.png" 
+              src="/logomarca-atual.png" 
               alt="Logo Tarefas e Hábitos" 
               className="h-16 md:h-24 w-auto object-contain rounded-xl"
             />
