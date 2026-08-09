@@ -704,7 +704,7 @@ export default function App() {
 
   // Subscription Gate (Pix Checkout)
   if (profile?.status !== 'active' || isExpired) {
-    const pixKey = "SUA-CHAVE-PIX-AQUI"; // Pode ser trocada depois
+    const pixKey = "00020126580014BR.GOV.BCB.PIX0136c6ac4c13-eac3-4d96-88ca-09077ac09108520400005303986540529.905802BR5925Vanderlei Galvao da Silva6007Jacarei62070503***63048859";
     const message = `Já efetuei o meu pagamento via PIX.\n\nMeus Dados:\nNome: ${profile?.name || 'Não informado'}\nEmail: ${profile?.email || 'Não informado'}\nWhatsApp: ${profile?.whatsapp || 'Não informado'}\n\nPode liberar meu acesso por favor?`;
     const whatsappUrl = `https://wa.me/5512981152060?text=${encodeURIComponent(message)}`;
 
@@ -726,8 +726,8 @@ export default function App() {
             {/* Decoração sutil */}
             <div className="absolute top-0 left-0 w-full h-1 gold-gradient-bg" />
             
-            <div className="w-48 h-48 bg-white/5 border-2 border-dashed border-gold-primary/30 mx-auto rounded-xl mb-6 flex flex-col items-center justify-center">
-              <span className="text-gray-500 font-mono text-xs text-center px-4">Espaço para o QR Code</span>
+            <div className="w-48 h-48 bg-white p-2 mx-auto rounded-xl mb-6 flex flex-col items-center justify-center shadow-lg">
+              <img src="/qr-pagamento.png" alt="QR Code PIX" className="w-full h-full object-contain" />
             </div>
             
             <div className="text-left">
