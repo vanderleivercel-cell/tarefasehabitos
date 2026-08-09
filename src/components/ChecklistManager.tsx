@@ -311,7 +311,7 @@ export default function ChecklistManager({
               exit={{ opacity: 0 }}
               className="text-center py-8 border border-dashed border-lux-border rounded-xl bg-black/10"
             >
-              <span className="text-gray-500 text-xs font-serif-lux tracking-wide">Nenhuma tarefa encontrada neste segmento.</span>
+            <span className="text-gray-400 text-sm font-serif-lux tracking-widest">Nenhuma tarefa encontrada neste segmento.</span>
             </motion.div>
           ) : (
             sortedTasks.map((task) => {

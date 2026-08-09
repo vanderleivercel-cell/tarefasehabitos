@@ -137,7 +137,7 @@ export default function RemindersManager({
       <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
         {reminders.length === 0 ? (
           <div className="text-center py-8 border border-dashed border-lux-border rounded-xl bg-black/10">
-            <span className="text-gray-500 text-xs font-serif-lux tracking-wide">Sem lembretes configurados. Agende seus momentos cruciais.</span>
+            <span className="text-gray-400 text-sm font-serif-lux tracking-widest leading-relaxed text-center block px-4">Sem lembretes configurados.<br/>Agende seus momentos cruciais.</span>
           </div>
         ) : (
           reminders.map((reminder) => {

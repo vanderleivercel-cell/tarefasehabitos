@@ -237,7 +237,7 @@ export default function HabitsManager({
       <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1">
         {filteredHabits.length === 0 ? (
           <div className="text-center py-8 border border-dashed border-lux-border rounded-xl bg-black/10">
-            <span className="text-gray-500 text-xs font-serif-lux tracking-wide">Nenhum hábito cadastrado nesta categoria.</span>
+            <span className="text-gray-400 text-sm font-serif-lux tracking-widest">Nenhum hábito cadastrado nesta categoria.</span>
           </div>
         ) : (
           filteredHabits.map((habit) => {
