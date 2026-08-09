@@ -46,7 +46,7 @@ export function Auth() {
       <div className="w-full max-w-md bg-lux-card/80 border border-lux-border rounded-2xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.8)] backdrop-blur-md">
         
         <div className="flex flex-col items-center mb-8">
-          <img src="/logo-removebg.png" alt="Tarefas e Hábitos Logo" className="h-20 w-auto object-contain mb-4" />
+          <img src="/logomarca-nova.png" alt="Tarefas e Hábitos Logo" className="h-20 w-auto object-contain mb-4" />
           <h2 className="font-serif-lux text-2xl font-bold text-white uppercase tracking-widest text-center">
             {isLogin ? 'Acesse sua Conta' : 'Crie sua Conta'}
           </h2>
