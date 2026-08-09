@@ -704,7 +704,7 @@ export default function App() {
 
   // Subscription Gate (Pix Checkout)
   if (profile?.status !== 'active' || isExpired) {
-    const pixKey = "00020126580014BR.GOV.BCB.PIX0136c6ac4c13-eac3-4d96-88ca-09077ac09108520400005303986540529.905802BR5925Vanderlei Galvao da Silva6007Jacarei62070503***63048859";
+    const pixKey = "00020126580014BR.GOV.BCB.PIX0136c6ac4c13-eac3-4d96-88ca-09077ac09108520400005303986540514.905802BR5925Vanderlei Galvao da Silva6007Jacarei62070503***6304225D";
     const message = `Já efetuei o meu pagamento via PIX.\n\nMeus Dados:\nNome: ${profile?.name || 'Não informado'}\nEmail: ${profile?.email || 'Não informado'}\nWhatsApp: ${profile?.whatsapp || 'Não informado'}\n\nPode liberar meu acesso por favor?`;
     const whatsappUrl = `https://wa.me/5512981152060?text=${encodeURIComponent(message)}`;
 
@@ -727,7 +727,7 @@ export default function App() {
             <div className="absolute top-0 left-0 w-full h-1 gold-gradient-bg" />
             
             <div className="w-48 h-48 bg-white p-2 mx-auto rounded-xl mb-6 flex flex-col items-center justify-center shadow-lg">
-              <img src="/qr-pagamento.png" alt="QR Code PIX" className="w-full h-full object-contain" />
+              <img src="/qr-pagamento-1490.png" alt="QR Code PIX" className="w-full h-full object-contain" />
             </div>
             
             <div className="text-left">
