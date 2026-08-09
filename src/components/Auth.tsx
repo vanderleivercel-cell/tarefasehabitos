@@ -6,6 +6,8 @@ export function Auth() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
   const [isLogin, setIsLogin] = useState(true);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -23,9 +25,14 @@ export function Auth() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              name,
+              whatsapp,
+            }
+          }
         });
         if (error) throw error;
-        alert('Cadastro realizado com sucesso! Verifique seu email para confirmar ou já pode fazer o login se a confirmação estiver desativada no painel.');
       }
     } catch (error: any) {
       alert(error.error_description || error.message);
@@ -49,6 +56,34 @@ export function Auth() {
         </div>
 
         <form onSubmit={handleAuth} className="space-y-6">
+          {!isLogin && (
+            <>
+              <div>
+                <label className="block text-xs font-serif-lux uppercase tracking-widest text-gold-primary mb-2">Nome Completo</label>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-black/50 border border-lux-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-gold-primary focus:ring-1 focus:ring-gold-primary transition-all font-mono"
+                  placeholder="Seu Nome"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-serif-lux uppercase tracking-widest text-gold-primary mb-2">WhatsApp</label>
+                <input
+                  type="tel"
+                  required
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  className="w-full bg-black/50 border border-lux-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-gold-primary focus:ring-1 focus:ring-gold-primary transition-all font-mono"
+                  placeholder="(11) 99999-9999"
+                />
+              </div>
+            </>
+          )}
+
           <div>
             <label className="block text-xs font-serif-lux uppercase tracking-widest text-gold-primary mb-2">Email</label>
             <input

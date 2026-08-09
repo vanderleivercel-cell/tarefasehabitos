@@ -31,6 +31,8 @@ import {
   RefreshCw,
   Clock,
   Loader2,
+  Copy,
+  MessageCircle
 } from 'lucide-react';
 
 function MainApp({ session, profile }: { session: Session; profile: any }) {
@@ -666,18 +668,65 @@ export default function App() {
     );
   }
 
-  // Subscription Gate
+  // Subscription Gate (Pix Checkout)
   if (profile?.status !== 'active') {
+    const pixKey = "SUA-CHAVE-PIX-AQUI"; // Pode ser trocada depois
+    const message = `Já efetuei o meu pagamento via PIX.\n\nMeus Dados:\nNome: ${profile?.name || 'Não informado'}\nEmail: ${profile?.email || 'Não informado'}\nWhatsApp: ${profile?.whatsapp || 'Não informado'}\n\nPode liberar meu acesso por favor?`;
+    const whatsappUrl = `https://wa.me/5512981152060?text=${encodeURIComponent(message)}`;
+
     return (
       <div className="min-h-screen bg-lux-bg flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md bg-lux-card/80 border border-yellow-500/30 rounded-2xl p-8 text-center shadow-[0_8px_32px_rgba(0,0,0,0.8)] backdrop-blur-md">
-          <Clock className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-          <h2 className="font-serif-lux text-xl font-bold text-white uppercase tracking-widest mb-4">Assinatura Pendente</h2>
-          <p className="text-gray-400 font-mono text-sm mb-8">
-            Seu acesso está em análise ou aguardando confirmação de pagamento. Por favor, aguarde a liberação pelo administrador.
+        <div className="w-full max-w-md bg-lux-card/90 border border-gold-primary/30 rounded-2xl p-8 text-center shadow-[0_8px_32px_rgba(212,175,55,0.15)] backdrop-blur-md">
+          
+          <h2 className="font-serif-lux text-2xl font-bold text-white uppercase tracking-widest mb-2">Finalize seu Acesso</h2>
+          <p className="text-gray-400 font-mono text-sm mb-6">
+            Para liberar seu aplicativo, realize o pagamento via PIX utilizando a chave abaixo.
           </p>
-          <button onClick={() => supabase.auth.signOut()} className="text-gold-primary border border-gold-primary/50 hover:bg-gold-primary/10 px-6 py-2 rounded uppercase font-bold tracking-widest text-xs transition-colors">
-            Sair
+
+          {/* Pix Box */}
+          <div className="bg-black/50 border border-lux-border rounded-xl p-6 mb-6 relative overflow-hidden">
+            {/* Decoração sutil */}
+            <div className="absolute top-0 left-0 w-full h-1 gold-gradient-bg" />
+            
+            <div className="w-48 h-48 bg-white/5 border-2 border-dashed border-gold-primary/30 mx-auto rounded-xl mb-6 flex flex-col items-center justify-center">
+              <span className="text-gray-500 font-mono text-xs text-center px-4">Espaço para o QR Code</span>
+            </div>
+            
+            <div className="text-left">
+              <p className="text-[10px] font-serif-lux text-gold-primary uppercase tracking-widest mb-2">Chave Pix (Copia e Cola)</p>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="text" 
+                  readOnly 
+                  value={pixKey}
+                  className="w-full bg-black border border-lux-border rounded-lg px-3 py-3 text-gray-300 font-mono text-sm focus:outline-none focus:border-gold-primary/50 transition-colors"
+                />
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(pixKey);
+                    alert('Chave PIX copiada para a área de transferência!');
+                  }}
+                  className="bg-gold-primary text-black hover:bg-gold-primary/80 p-3 rounded-lg transition-colors flex items-center justify-center"
+                  title="Copiar chave"
+                >
+                  <Copy size={20} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <a 
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1DA851] text-white font-bold text-sm tracking-wide py-4 px-4 rounded-xl transition-colors shadow-lg hover:shadow-xl mb-6 shadow-[#25D366]/20"
+          >
+            <MessageCircle size={24} />
+            CLIQUE AQUI E CONFIRME O PAGAMENTO AGORA
+          </a>
+
+          <button onClick={() => supabase.auth.signOut()} className="text-gray-500 hover:text-white text-xs font-mono transition-colors uppercase tracking-widest underline decoration-gray-700 underline-offset-4">
+            Sair e voltar depois
           </button>
         </div>
       </div>

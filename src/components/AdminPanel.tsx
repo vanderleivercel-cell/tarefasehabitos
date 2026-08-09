@@ -6,6 +6,8 @@ import { motion } from 'motion/react';
 type Profile = {
   id: string;
   email: string;
+  name?: string;
+  whatsapp?: string;
   role: 'admin' | 'user';
   status: 'pending' | 'active' | 'blocked';
   created_at: string;
@@ -117,10 +119,18 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
                     <tr key={profile.id} className="border-b border-lux-border/50 hover:bg-white/5 transition-colors">
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-gold-primary/20 flex items-center justify-center border border-gold-primary/50">
-                            <User size={16} className="text-gold-primary" />
+                          <div className="w-10 h-10 rounded-full bg-gold-primary/20 flex items-center justify-center border border-gold-primary/50 shrink-0">
+                            <User size={20} className="text-gold-primary" />
                           </div>
-                          <span className="text-gray-200 font-mono">{profile.email}</span>
+                          <div>
+                            <span className="text-gray-200 font-mono font-bold block">{profile.name || 'Sem Nome'}</span>
+                            <span className="text-gray-500 font-mono text-xs block">{profile.email}</span>
+                            {profile.whatsapp && (
+                              <span className="text-[#25D366] font-mono text-xs block mt-1">
+                                WhatsApp: {profile.whatsapp}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="p-4 text-sm text-gray-400 font-mono">
