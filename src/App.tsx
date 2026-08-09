@@ -713,11 +713,11 @@ export default function App() {
         <div className="w-full max-w-md bg-lux-card/90 border border-gold-primary/30 rounded-2xl p-8 text-center shadow-[0_8px_32px_rgba(212,175,55,0.15)] backdrop-blur-md">
           
           <h2 className="font-serif-lux text-2xl font-bold text-white uppercase tracking-widest mb-2">
-            {isExpired ? 'Assinatura Expirada' : 'Finalize seu Acesso'}
+            {isExpired ? 'Tempo Esgotado' : 'Finalize seu Acesso'}
           </h2>
           <p className="text-gray-400 font-mono text-sm mb-6">
             {isExpired 
-              ? 'O seu período de 30 dias expirou. Realize o pagamento para renovar sua assinatura.' 
+              ? 'Seu tempo de acesso expirou. Realize o pagamento de R$ 14,90 para liberar sua assinatura mensal e continuar evoluindo seus hábitos!' 
               : 'Para liberar seu aplicativo, realize o pagamento via PIX utilizando a chave abaixo.'}
           </p>
 
