@@ -662,8 +662,14 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const [isRecovering, setIsRecovering] = useState(false);
 
   useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.includes('type=recovery')) {
+      setIsRecovering(true);
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) fetchProfile(session.user.id);
@@ -673,6 +679,9 @@ export default function App() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (_event === 'PASSWORD_RECOVERY') {
+        setIsRecovering(true);
+      }
       setSession(session);
       if (session) fetchProfile(session.user.id);
       else setLoadingProfile(false);
@@ -690,6 +699,53 @@ export default function App() {
 
   if (!session) {
     return <Auth />;
+  }
+
+  if (isRecovering) {
+    return (
+      <div className="min-h-screen bg-lux-bg flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-md bg-lux-card/80 border border-lux-border rounded-2xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.8)] backdrop-blur-md">
+          <h2 className="font-serif-lux text-2xl font-bold text-white uppercase tracking-widest text-center mb-6">
+            Nova Senha
+          </h2>
+          <form 
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const password = formData.get('password') as string;
+              
+              try {
+                const { error } = await supabase.auth.updateUser({ password });
+                if (error) throw error;
+                alert('Senha atualizada com sucesso!');
+                setIsRecovering(false);
+                window.location.hash = '';
+              } catch (error: any) {
+                alert(error.error_description || error.message);
+              }
+            }} 
+            className="space-y-6"
+          >
+            <div>
+              <label className="block text-xs font-serif-lux uppercase tracking-widest text-gold-primary mb-2">Digite sua nova senha</label>
+              <input
+                type="password"
+                name="password"
+                required
+                className="w-full bg-black/50 border border-lux-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-gold-primary focus:ring-1 focus:ring-gold-primary transition-all font-mono"
+                placeholder="••••••••"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full flex items-center justify-center gap-2 gold-gradient-bg text-black font-bold uppercase tracking-widest py-3 px-4 rounded-lg hover:opacity-90 transition-opacity"
+            >
+              Atualizar Senha
+            </button>
+          </form>
+        </div>
+      </div>
+    );
   }
 
   if (loadingProfile) {

@@ -9,6 +9,28 @@ export function Auth() {
   const [name, setName] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [isLogin, setIsLogin] = useState(true);
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      alert("Por favor, digite seu email primeiro.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin
+      });
+      if (error) throw error;
+      alert("Um link de recuperação foi enviado para o seu email. Por favor, cheque sua caixa de entrada (e a de spam).");
+      setIsResetting(false);
+    } catch (error: any) {
+      alert(error.error_description || error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,15 +70,15 @@ export function Auth() {
         <div className="flex flex-col items-center mb-8">
           <img src="/logomarca-atual.png" alt="Tarefas e Hábitos Logo" className="h-20 w-auto object-contain mb-4" />
           <h2 className="font-serif-lux text-2xl font-bold text-white uppercase tracking-widest text-center">
-            {isLogin ? 'Acesse sua Conta' : 'Crie sua Conta'}
+            {isResetting ? 'Recuperar Senha' : isLogin ? 'Acesse sua Conta' : 'Crie sua Conta'}
           </h2>
           <p className="text-gray-400 mt-2 text-center text-sm font-mono">
             O seu universo particular de foco e disciplina.
           </p>
         </div>
 
-        <form onSubmit={handleAuth} className="space-y-6">
-          {!isLogin && (
+        <form onSubmit={isResetting ? handleReset : handleAuth} className="space-y-6">
+          {!isLogin && !isResetting && (
             <>
               <div>
                 <label className="block text-xs font-serif-lux uppercase tracking-widest text-gold-primary mb-2">Nome Completo</label>
@@ -96,17 +118,31 @@ export function Auth() {
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-serif-lux uppercase tracking-widest text-gold-primary mb-2">Senha</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-black/50 border border-lux-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-gold-primary focus:ring-1 focus:ring-gold-primary transition-all font-mono"
-              placeholder="••••••••"
-            />
-          </div>
+          {!isResetting && (
+            <div>
+              <label className="block text-xs font-serif-lux uppercase tracking-widest text-gold-primary mb-2">Senha</label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-black/50 border border-lux-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-gold-primary focus:ring-1 focus:ring-gold-primary transition-all font-mono"
+                placeholder="••••••••"
+              />
+            </div>
+          )}
+
+          {isLogin && !isResetting && (
+            <div className="flex justify-end">
+              <button 
+                type="button" 
+                onClick={() => setIsResetting(true)}
+                className="text-xs text-gold-primary hover:text-white transition-colors font-mono underline decoration-gold-primary/30"
+              >
+                Esqueci minha senha
+              </button>
+            </div>
+          )}
 
           <button
             type="submit"
@@ -115,6 +151,8 @@ export function Auth() {
           >
             {loading ? (
               <Loader2 size={20} className="animate-spin" />
+            ) : isResetting ? (
+              <>Enviar Link</>
             ) : isLogin ? (
               <><LogIn size={20} /> Entrar</>
             ) : (
@@ -124,13 +162,23 @@ export function Auth() {
         </form>
 
         <div className="mt-6 text-center">
-          <button
-            type="button"
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-gray-400 hover:text-gold-primary transition-colors font-mono"
-          >
-            {isLogin ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Faça Login'}
-          </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (isResetting) {
+                  setIsResetting(false);
+                } else {
+                  setIsLogin(!isLogin);
+                }
+              }}
+              className="text-sm text-gray-400 hover:text-gold-primary transition-colors font-mono"
+            >
+              {isResetting 
+                ? 'Voltar para o Login' 
+                : isLogin 
+                  ? 'Não tem uma conta? Cadastre-se' 
+                  : 'Já tem uma conta? Faça Login'}
+            </button>
         </div>
       </div>
     </div>
