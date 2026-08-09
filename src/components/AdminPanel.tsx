@@ -105,7 +105,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <Loader2 className="animate-spin text-gold-primary" size={40} />
