@@ -329,6 +329,16 @@ function MainApp({ session, profile }: { session: Session; profile: any }) {
               </div>
             )}
 
+            {/* Admin Panel Button */}
+            {profile?.role === 'admin' && (
+              <button 
+                onClick={() => setShowAdminPanel(true)}
+                className="flex items-center justify-center gap-2 text-xs font-bold text-black gold-gradient-bg uppercase tracking-widest rounded-lg px-4 py-3 hover:opacity-90 transition-opacity shadow-[0_0_15px_rgba(212,175,55,0.3)]"
+              >
+                Painel Admin
+              </button>
+            )}
+
             {/* Luxury Clock & Logout Widget */}
             <div className="flex items-center gap-4 bg-lux-card/40 border border-lux-border rounded-xl px-5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
               <div className="text-right">
