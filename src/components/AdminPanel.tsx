@@ -42,13 +42,22 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
   };
 
   const updateStatus = async (id: string, newStatus: Profile['status']) => {
+    const updates: Partial<Profile> = { status: newStatus };
+    
+    // Se ativado, ganha 30 dias de acesso
+    if (newStatus === 'active') {
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30);
+      updates.expires_at = expiresAt.toISOString();
+    }
+
     const { error } = await supabase
       .from('profiles')
-      .update({ status: newStatus })
+      .update(updates)
       .eq('id', id);
     
     if (!error) {
-      setProfiles(prev => prev.map(p => p.id === id ? { ...p, status: newStatus } : p));
+      setProfiles(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
     } else {
       alert('Erro ao atualizar status: ' + error.message);
     }
@@ -111,6 +120,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
                     <th className="p-4 text-xs font-serif-lux uppercase tracking-widest text-gold-primary">Data de Cadastro</th>
                     <th className="p-4 text-xs font-serif-lux uppercase tracking-widest text-gold-primary">Privilégio</th>
                     <th className="p-4 text-xs font-serif-lux uppercase tracking-widest text-gold-primary">Assinatura</th>
+                    <th className="p-4 text-xs font-serif-lux uppercase tracking-widest text-gold-primary">Expiração</th>
                     <th className="p-4 text-xs font-serif-lux uppercase tracking-widest text-gold-primary text-right">Ações</th>
                   </tr>
                 </thead>
@@ -166,6 +176,15 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
                             <option value="blocked">Bloqueado</option>
                           </select>
                         </div>
+                      </td>
+                      <td className="p-4 text-sm font-mono">
+                        {profile.expires_at ? (
+                          <span className={new Date(profile.expires_at) < new Date() ? 'text-red-500' : 'text-green-500'}>
+                            {new Date(profile.expires_at).toLocaleDateString('pt-BR')}
+                          </span>
+                        ) : (
+                          <span className="text-gray-500">-</span>
+                        )}
                       </td>
                       <td className="p-4 text-right">
                         {/* More actions could go here */}

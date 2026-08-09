@@ -306,8 +306,30 @@ function MainApp({ session, profile }: { session: Session; profile: any }) {
             />
           </div>
 
-          {/* Luxury Clock & Logout Widget */}
+          {/* Widgets */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            
+            {profile?.expires_at && (
+              <div className="flex items-center gap-4 bg-lux-card/40 border border-gold-primary/30 rounded-xl px-5 py-3 shadow-[0_4px_20px_rgba(212,175,55,0.1)]">
+                <div className="text-right">
+                  <span className="text-[10px] text-gray-500 block font-serif-lux uppercase tracking-widest">Validade</span>
+                  <span className="text-sm font-mono font-bold text-white">
+                    {new Date(profile.expires_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '').toUpperCase()}
+                  </span>
+                </div>
+                <div className="w-[1px] h-8 bg-lux-border/50" />
+                <a 
+                  href={`https://wa.me/5512981152060?text=${encodeURIComponent(`Olá, gostaria de renovar minha assinatura!\n\nMeus Dados:\nNome: ${profile?.name || ''}\nEmail: ${profile?.email || ''}\nWhatsApp: ${profile?.whatsapp || ''}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] font-bold text-black gold-gradient-bg px-3 py-1.5 rounded uppercase tracking-widest hover:opacity-90 transition-opacity"
+                >
+                  Renovar
+                </a>
+              </div>
+            )}
+
+            {/* Luxury Clock & Logout Widget */}
             <div className="flex items-center gap-4 bg-lux-card/40 border border-lux-border rounded-xl px-5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
               <div className="text-right">
                 <span className="text-[10px] text-gray-500 block font-serif-lux uppercase tracking-widest">Tempo Presente</span>
@@ -668,8 +690,10 @@ export default function App() {
     );
   }
 
+  const isExpired = profile?.expires_at ? new Date(profile.expires_at) < new Date() : false;
+
   // Subscription Gate (Pix Checkout)
-  if (profile?.status !== 'active') {
+  if (profile?.status !== 'active' || isExpired) {
     const pixKey = "SUA-CHAVE-PIX-AQUI"; // Pode ser trocada depois
     const message = `Já efetuei o meu pagamento via PIX.\n\nMeus Dados:\nNome: ${profile?.name || 'Não informado'}\nEmail: ${profile?.email || 'Não informado'}\nWhatsApp: ${profile?.whatsapp || 'Não informado'}\n\nPode liberar meu acesso por favor?`;
     const whatsappUrl = `https://wa.me/5512981152060?text=${encodeURIComponent(message)}`;
@@ -678,9 +702,13 @@ export default function App() {
       <div className="min-h-screen bg-lux-bg flex flex-col items-center justify-center p-4">
         <div className="w-full max-w-md bg-lux-card/90 border border-gold-primary/30 rounded-2xl p-8 text-center shadow-[0_8px_32px_rgba(212,175,55,0.15)] backdrop-blur-md">
           
-          <h2 className="font-serif-lux text-2xl font-bold text-white uppercase tracking-widest mb-2">Finalize seu Acesso</h2>
+          <h2 className="font-serif-lux text-2xl font-bold text-white uppercase tracking-widest mb-2">
+            {isExpired ? 'Assinatura Expirada' : 'Finalize seu Acesso'}
+          </h2>
           <p className="text-gray-400 font-mono text-sm mb-6">
-            Para liberar seu aplicativo, realize o pagamento via PIX utilizando a chave abaixo.
+            {isExpired 
+              ? 'O seu período de 30 dias expirou. Realize o pagamento para renovar sua assinatura.' 
+              : 'Para liberar seu aplicativo, realize o pagamento via PIX utilizando a chave abaixo.'}
           </p>
 
           {/* Pix Box */}
