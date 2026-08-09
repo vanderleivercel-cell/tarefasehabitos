@@ -27,6 +27,17 @@ import {
   BookMarked,
   Compass,
   Zap,
+  Wallet,
+  DollarSign,
+  Smile,
+  Users,
+  Church,
+  Cross,
+  Gamepad2,
+  Coffee,
+  Music,
+  Camera,
+  LineChart,
 } from 'lucide-react';
 
 interface IconRendererProps {
@@ -57,6 +68,17 @@ export const iconMap: Record<string, React.ComponentType<any>> = {
   BookMarked,
   Compass,
   Zap,
+  Wallet,
+  DollarSign,
+  Smile,
+  Users,
+  Church,
+  Cross,
+  Gamepad2,
+  Coffee,
+  Music,
+  Camera,
+  LineChart,
 };
 
 export default function IconRenderer({ name, className = '', size = 18 }: IconRendererProps) {

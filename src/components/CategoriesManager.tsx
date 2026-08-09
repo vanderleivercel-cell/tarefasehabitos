@@ -58,7 +58,7 @@ export default function CategoriesManager({
     setIsAdding(false);
   };
 
-  const availableIcons = ['Heart', 'Briefcase', 'BookOpen', 'Coins', 'Sparkles', 'Shield', 'User', 'Trophy', 'Activity', 'Map', 'Flame', 'Dumbbell', 'Zap'];
+  const availableIcons = ['Heart', 'Briefcase', 'BookOpen', 'Coins', 'Sparkles', 'Shield', 'User', 'Trophy', 'Activity', 'Map', 'Flame', 'Dumbbell', 'Zap', 'Target', 'LineChart', 'Wallet', 'DollarSign', 'Smile', 'Users', 'Church', 'Cross', 'Gamepad2', 'Coffee', 'Music', 'Camera'];
 
   return (
     <div id="categories-manager" className="bg-lux-card border border-lux-border rounded-xl p-5 gold-border-glow">
