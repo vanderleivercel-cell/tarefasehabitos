@@ -10,6 +10,8 @@ export function Auth() {
   const [whatsapp, setWhatsapp] = useState('');
   const [isLogin, setIsLogin] = useState(true);
   const [isResetting, setIsResetting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,15 +20,18 @@ export function Auth() {
       return;
     }
     setLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin
       });
       if (error) throw error;
-      alert("Um link de recuperação foi enviado para o seu email. Por favor, cheque sua caixa de entrada (e a de spam).");
+      setSuccessMsg("Um link de recuperação foi enviado para o seu email. Por favor, cheque sua caixa de entrada (e a de spam).");
       setIsResetting(false);
     } catch (error: any) {
-      alert(error.error_description || error.message);
+      let msg = error.error_description || error.message;
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
@@ -35,6 +40,8 @@ export function Auth() {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
     
     try {
       if (isLogin) {
@@ -44,7 +51,7 @@ export function Auth() {
         });
         if (error) throw error;
       } else {
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -56,18 +63,7 @@ export function Auth() {
         });
         if (error) throw error;
 
-        if (data.user) {
-          // Criar o profile
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert([
-              { id: data.user.id, email: data.user.email, name: name, whatsapp: whatsapp, role: 'user', status: 'pending' }
-            ]);
-          
-          if (profileError) throw profileError;
-        }
-
-        alert('Cadastro realizado com sucesso! Finalize o pagamento para liberar seu acesso.');
+        setSuccessMsg('Cadastro realizado com sucesso! Finalize o pagamento para liberar seu acesso.');
         setIsLogin(true); // Switch back to login or wait for auto-login
       }
     } catch (error: any) {
@@ -79,7 +75,7 @@ export function Auth() {
       } else if (msg === 'Password should be at least 6 characters.') {
         msg = 'A senha deve ter no mínimo 6 caracteres.';
       }
-      alert(msg);
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
@@ -98,6 +94,18 @@ export function Auth() {
             O seu universo particular de foco e disciplina.
           </p>
         </div>
+
+        {errorMsg && (
+          <div className="mb-6 bg-red-900/50 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg text-sm font-mono text-center">
+            {errorMsg}
+          </div>
+        )}
+        
+        {successMsg && (
+          <div className="mb-6 bg-green-900/50 border border-green-500/50 text-green-200 px-4 py-3 rounded-lg text-sm font-mono text-center">
+            {successMsg}
+          </div>
+        )}
 
         <form onSubmit={isResetting ? handleReset : handleAuth} className="space-y-6">
           {!isLogin && !isResetting && (
