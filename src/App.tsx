@@ -54,6 +54,9 @@ function MainApp({ session, profile }: { session: Session; profile: any }) {
   const [adminClicks, setAdminClicks] = useState(0);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
 
+  // Custom Alarm Modal State
+  const [activeAlarm, setActiveAlarm] = useState<string | null>(null);
+
   const handleFooterClick = () => {
     if (profile?.role !== 'admin') return;
     setAdminClicks(prev => {
@@ -146,8 +149,8 @@ function MainApp({ session, profile }: { session: Session; profile: any }) {
           if ('Notification' in window && Notification.permission === 'granted') {
             new Notification('Lembrete de Elite', { body: r.text, icon: '/vite.svg' });
           } else {
-            // Fallback if notifications are not enabled
-            alert(`🔔 Lembrete: ${r.text}`);
+            // Fallback: Custom in-app modal instead of thread-blocking alert
+            setActiveAlarm(r.text);
           }
         });
       }
@@ -664,6 +667,45 @@ function MainApp({ session, profile }: { session: Session; profile: any }) {
       </footer>
 
       {showAdminPanel && <AdminPanel onClose={() => setShowAdminPanel(false)} />}
+      
+      {/* Custom Alarm Modal for Mobile */}
+      <AnimatePresence>
+        {activeAlarm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="w-full max-w-sm bg-lux-card border border-gold-primary rounded-2xl p-8 flex flex-col items-center text-center shadow-[0_0_50px_rgba(212,175,55,0.3)] relative overflow-hidden"
+            >
+              {/* Pulsing glow background */}
+              <div className="absolute inset-0 bg-gold-primary/10 animate-pulse" />
+              
+              <Bell className="text-gold-primary w-16 h-16 mb-6 relative z-10 animate-bounce" />
+              
+              <h2 className="font-serif-lux text-2xl font-bold text-white uppercase tracking-widest mb-4 relative z-10">
+                Lembrete
+              </h2>
+              
+              <p className="text-lg text-gray-200 mb-8 font-mono relative z-10">
+                {activeAlarm}
+              </p>
+
+              <button
+                onClick={() => setActiveAlarm(null)}
+                className="w-full gold-gradient-bg text-black font-bold uppercase tracking-widest py-4 px-6 rounded-xl hover:opacity-90 transition-all active:scale-95 relative z-10"
+              >
+                Ciente
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
