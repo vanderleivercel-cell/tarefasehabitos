@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Shield, User, CheckCircle, XCircle, Clock, Loader2 } from 'lucide-react';
+import { Shield, User, CheckCircle, XCircle, Clock, Loader2, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
 
 type Profile = {
@@ -73,6 +73,22 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
       setProfiles(prev => prev.map(p => p.id === id ? { ...p, role: newRole } : p));
     } else {
       alert('Erro ao atualizar permissão: ' + error.message);
+    }
+  };
+
+  const handleDeleteUser = async (id: string, name: string) => {
+    const confirmDelete = window.confirm(`Tem certeza absoluta que deseja excluir definitivamente o usuário "${name}"?\nIsso apagará o login e todos os dados dele.`);
+    if (!confirmDelete) return;
+
+    try {
+      const { error } = await supabase.rpc('delete_user_by_admin', { target_user_id: id });
+      
+      if (error) throw error;
+      
+      setProfiles(prev => prev.filter(p => p.id !== id));
+      alert('Usuário excluído com sucesso!');
+    } catch (error: any) {
+      alert('Erro ao excluir usuário: ' + (error.message || 'Falha na comunicação com o banco.'));
     }
   };
 
@@ -187,7 +203,13 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
                         )}
                       </td>
                       <td className="p-4 text-right">
-                        {/* More actions could go here */}
+                        <button
+                          onClick={() => handleDeleteUser(profile.id, profile.name || profile.email)}
+                          className="text-gray-500 hover:text-red-500 p-2 rounded-lg transition-colors border border-transparent hover:border-red-500/30 hover:bg-red-500/10"
+                          title="Excluir Usuário"
+                        >
+                          <Trash2 size={18} />
+                        </button>
                       </td>
                     </tr>
                   ))}
