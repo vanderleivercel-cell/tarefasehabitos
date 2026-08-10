@@ -44,7 +44,7 @@ export function Auth() {
         });
         if (error) throw error;
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -55,9 +55,31 @@ export function Auth() {
           }
         });
         if (error) throw error;
+
+        if (data.user) {
+          // Criar o profile
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert([
+              { id: data.user.id, email: data.user.email, name: name, whatsapp: whatsapp, role: 'user', status: 'pending' }
+            ]);
+          
+          if (profileError) throw profileError;
+        }
+
+        alert('Cadastro realizado com sucesso! Finalize o pagamento para liberar seu acesso.');
+        setIsLogin(true); // Switch back to login or wait for auto-login
       }
     } catch (error: any) {
-      alert(error.error_description || error.message);
+      let msg = error.error_description || error.message;
+      if (msg === 'Invalid login credentials') {
+        msg = 'Email ou senha incorretos.';
+      } else if (msg === 'User already registered') {
+        msg = 'Este email já está cadastrado.';
+      } else if (msg === 'Password should be at least 6 characters.') {
+        msg = 'A senha deve ter no mínimo 6 caracteres.';
+      }
+      alert(msg);
     } finally {
       setLoading(false);
     }
