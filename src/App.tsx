@@ -298,12 +298,22 @@ function MainApp({ session, profile }: { session: Session; profile: any }) {
       <header className="max-w-7xl mx-auto px-4 pt-8 pb-4">
         {/* Upper Brand bar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-lux-border/60">
-          <div>
+          <div className="flex flex-col sm:flex-row items-center gap-6">
             <img 
               src="/logomarca-atual.png" 
               alt="Logo Tarefas e Hábitos" 
               className="h-16 md:h-24 w-auto object-contain rounded-xl"
             />
+            <div className="flex items-center bg-lux-card/40 border border-gold-primary/20 rounded-xl px-4 py-2 shadow-[0_4px_15px_rgba(212,175,55,0.05)]">
+              <div>
+                <span className="block text-xs font-serif-lux text-gold-primary uppercase tracking-widest mb-0.5">
+                  Taxa de Uso por 30 dias <strong className="text-white">R$ 14,90</strong>
+                </span>
+                <span className="block text-[10px] font-mono text-gray-400">
+                  🎁 7 dias Grátis para testar!
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Widgets */}
