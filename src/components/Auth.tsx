@@ -191,24 +191,35 @@ export function Auth() {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-8 pt-6 border-t border-lux-border/50 flex flex-col items-center w-full">
+          {isResetting ? (
             <button
               type="button"
-              onClick={() => {
-                if (isResetting) {
-                  setIsResetting(false);
-                } else {
-                  setIsLogin(!isLogin);
-                }
-              }}
+              onClick={() => setIsResetting(false)}
               className="text-sm text-gray-400 hover:text-gold-primary transition-colors font-mono"
             >
-              {isResetting 
-                ? 'Voltar para o Login' 
-                : isLogin 
-                  ? 'Não tem uma conta? Cadastre-se' 
-                  : 'Já tem uma conta? Faça Login'}
+              Voltar para o Login
             </button>
+          ) : isLogin ? (
+            <div className="w-full flex flex-col items-center gap-3">
+              <span className="text-sm text-gray-400 font-mono">Ainda não tem acesso?</span>
+              <button
+                type="button"
+                onClick={() => setIsLogin(false)}
+                className="w-full py-3 px-4 rounded-lg font-bold uppercase tracking-widest text-black bg-[#39FF14] hover:bg-[#32e612] transition-colors shadow-[0_0_20px_rgba(57,255,20,0.4)] hover:shadow-[0_0_25px_rgba(57,255,20,0.6)]"
+              >
+                Cadastre-se Agora
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsLogin(true)}
+              className="text-sm text-gray-400 hover:text-gold-primary transition-colors font-mono"
+            >
+              Já tem uma conta? Faça Login
+            </button>
+          )}
         </div>
       </div>
     </div>
